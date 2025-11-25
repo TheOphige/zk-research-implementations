@@ -1,0 +1,39 @@
+# -----------------------
+# Circom build artifacts
+# -----------------------
+*.r1cs
+*.sym
+
+# WASM & JS build folders
+*_js/
+*_cpp/
+
+# Witness files
+*.wtns
+*.witness
+
+# Proofs and keys
+*.zkey
+*.ptau
+
+# Verification keys & solidity verifiers
+*.json
+verifier.sol
+
+# Temporary snarkjs files
+snarkjs-*
+
+# Logs
+*.log
+
+# Node modules (if using snarkjs or npm scripts)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Rust (if you use cargo to script or run tools)
+target/
+
+# Mac / Linux junk
+.DS_Store
+Thumbs.db
