@@ -49,3 +49,4 @@ template IsBinaryRepresentation(n) {
     // in[0] * 1 + in[1] * 2 + in[2] * 4 + in[3] * 8... === k
     acc === k;
 }
+
