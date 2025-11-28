@@ -18,7 +18,7 @@ template Main() {
     a2.in <== a;
     b2.in <== b;
 
-    a2 + b2 === sumOfSquares;
+    a2.out + b2.out === sumOfSquares;
 }
 
 component main = Main();
