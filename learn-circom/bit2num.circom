@@ -9,7 +9,7 @@ template Main(n) {
     component b2n = Bits2Num(n);
 
     for (var i=0; i<n; i++) {
-        b2n.in[i] = in[i];
+        b2n.in[i] <== in[i];
     }
 
     b2n.out === v;
