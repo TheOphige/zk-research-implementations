@@ -5,7 +5,7 @@ template Bits2Num(n) {
 
     var acc;
     var powersOf2 = 1;
-    for (var i=o; i<n; i++) {
+    for (var i=0; i<n; i++) {
         acc += in[i] * powersOf2;
         powersOf2 *= 2;
     }

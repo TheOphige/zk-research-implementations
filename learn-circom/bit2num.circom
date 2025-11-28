@@ -1,4 +1,4 @@
-include "learn-circom/bitify.com";
+include "bitify.circom";
 
 // using bitify.circom
 // convert bits to numbers in[0] * 1 + in[1] * 2 + in[2] * 4 + in[3] * 8... === v
