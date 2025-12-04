@@ -1,3 +1,6 @@
 [submodule "zero-knowledge-puzzles"]
 	path = zero-knowledge-puzzles
 	url = https://github.com/TheOphige/zero-knowledge-puzzles.git
+[submodule "ZK-bulletproofs"]
+	path = ZK-bulletproofs
+	url = https://github.com/TheOphige/ZK-bulletproofs.git
