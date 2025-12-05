@@ -1,3 +1,19 @@
+// def foo(x):
+
+//   if x == 5: // switch1(cond1)
+//     out = 14 // branch1
+//   elif x == 9: // switch2(cond2)
+//     out = 22 // branch2
+//   elif x == 10: // switch3(cond3)
+//     out = 23 // branch3
+//   else // switch4(cond4)
+//     out = 45 // branch4
+
+//   return out
+
+
+
+
 include "./node_modules/circomlib/circuits/comparators.circom";
 include "./node_modules/circomlib/circuits/multiplexer.circom";
 
