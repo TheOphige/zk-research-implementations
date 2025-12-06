@@ -11,6 +11,36 @@
 
 //   return out
 
+// include "./node_modules/circomlib/circuits/comparators.circom";
+// template Branch4(cond1, cond2, cond3, branch1, branch2, branch3, branch4){
+//     signal input x;
+//     signal output out;
+
+//     signal switch1;
+//     signal switch2;
+//     signal switch3;
+//     signal otherwise;
+
+//     switch1 <== IsEqual()([x, cond1]);
+//     switch2 <== IsEqual()([x, cond2]);
+//     switch3 <== IsEqual()([x, cond3]);
+//     otherwise <== IsZero()(switch1 + switch2 + switch3);
+
+//     signal branches1_2 <== switch1 * branch1 + switch2 * branch2;
+//     signal branches3_4 <== switch3 * branch3 + otherwise * branch4;
+
+//     out <== branches1_2 + branches3_4;
+// }
+// template MultiBranchConditional(){
+//     signal input x;
+//     signal output out;
+
+//     component branch4 = Branch4(5,9,10,14,22,23,45);
+
+//     branch4.x <== x;
+//     branch.out ==> out;
+// }
+// component main = MultiBranchConditional(); 
 
 
 
