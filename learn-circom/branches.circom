@@ -82,13 +82,13 @@ template BranchN(n) {
   // are active, then `otherwise` must be 1
   switches[n - 1] <== IsZero()(total);
 
-  component InnerProduct = EscalarProduct(n);
+  component InnerProduct = EscalarProduct(n); 
   for (var i = 0; i < n; i++) {
     InnerProduct.in1[i] <== switches[i];
     InnerProduct.in2[i] <== branches[i];
   }
 
-  out <== InnerProduct.out;
+  out <== InnerProduct.out; // out <== switch1 * branch1 + switch2 * branch2 + ... + switchn * branchn;
 }
 
 template MultiBranchConditional() {
