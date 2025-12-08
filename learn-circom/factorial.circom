@@ -10,7 +10,7 @@
 
 //   return ans[x]
 
-template factorial(n){
+template Factorial(n){
     signal input in;
     signal output out;
 
@@ -40,7 +40,7 @@ template factorial(n){
     out <== mux.out[0];
 }
 
-component main = factorial(100);
+component main = Factorial(100);
 
 /*
   INPUT = { "in": "3" }
