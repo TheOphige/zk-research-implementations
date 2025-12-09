@@ -1,8 +1,8 @@
 /// INDICATE THEN CONSTRAIN
 pragma circom 2.1.6;
 
-include "circomlib/comparators.circom";
-include "circomlib/gates.circom";
+include "node_modules/circomlib/circuits/comparators.circom";
+include "node_modules/circomlib/circuits/gates.circom";
 
 // check if x is less than 5 or x is greater than 17
 

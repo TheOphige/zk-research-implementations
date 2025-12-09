@@ -7,7 +7,7 @@
 // 5 * 0 + 9 * 0 + 14 * 1 + 20 * 0
 // which results in 14.
 
-include "./node_modules/circomlib/comparators.circom";
+include "./node_modules/circomlib/circuits/comparators.circom";
 
 template QuinSelector(n) {
 
