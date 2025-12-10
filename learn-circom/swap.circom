@@ -71,4 +71,4 @@ template Swap(n){
     }
 }
 
-component main = Swap(2);
+// component main = Swap(2);
