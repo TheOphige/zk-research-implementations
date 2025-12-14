@@ -12,9 +12,7 @@ template AND3() {
   out <== temp * in[2];
 }
 
-// i is the column number
-// bits is how many bits we need
-// for the LessEqThan component
+// i is the column number bits is how many bits we need for the LessEqThan component
 template ShouldCopy(i, bits) {
   signal input sp;
   signal input is_push;
@@ -32,8 +30,7 @@ template ShouldCopy(i, bits) {
   is_add * (1 - is_add) === 0;
   is_mul * (1 - is_mul) === 0;
 
-  // it's cheaper to compute ≠ 0 than > 0 to avoid
-  // converting the number to binary
+  // it's cheaper to compute ≠ 0 than > 0 to avoid converting the number to binary
   signal spEqZero;
   signal spGteOne;
   spEqZero <== IsZero()(sp);
@@ -45,12 +42,10 @@ template ShouldCopy(i, bits) {
   spEqOne <== IsEqual()([sp, 1]);
   spGteTwo <== 1 - spEqOne * spEqZero;
 
-  // the current column is 1 or more 
-  // below the stack pointer
+  // the current column is 1 or more below the stack pointer
   signal oneBelowSp <== LessEqThan(bits)([i, sp - 1]);
 
-  // the current column is 3 or more
-  // below the stack pointer
+  // the current column is 3 or more below the stack pointer
   signal threeBelowSP <== LessEqThan(bits)([i, sp - 3]);
 
   // condition A
@@ -95,8 +90,7 @@ template CopyStack(m) {
     }
 }
 
-// n is how many instructions we can handle
-// since all the instructions might be push,
+// n is how many instructions we can handle since all the instructions might be push,
 // our stack needs capacity of up to n
 template ZKVM(n) {
   var NOP = 0;
@@ -106,10 +100,8 @@ template ZKVM(n) {
 
   signal input instr[2 * n];
 
-  // we add one extra row for sp because
-  // our algorithm always writes to the
-  // next row and we don't want to conditionally
-  // check for an array-out-of-bounds
+  // we add one extra row for sp because our algorithm always writes to the
+  // next row and we don't want to conditionally check for an array-out-of-bounds
   signal output sp[n + 1];
 
   signal output stack[n][n];
@@ -127,8 +119,7 @@ template ZKVM(n) {
   signal first_op_is_push;
   first_op_is_push <== IsEqual()([instr[0], PUSH]);
 
-  // if the first op is NOP, we are forcing the first
-  // value to be zero, but this is where the stack
+  // if the first op is NOP, we are forcing the first value to be zero, but this is where the stack
   // pointer is, so it doesn't matter
   stack[0][0] <== first_op_is_push * instr[1];
 
@@ -137,8 +128,7 @@ template ZKVM(n) {
     stack[0][i] <== 0;
   }
 
-  // we fill out the 0th elements to avoid
-  // uninitialzed signals
+  // we fill out the 0th elements to avoid uninitialzed signals
   sp[0] <== 0;
   sp[1] <== first_op_is_push;
   metaTable[0][IS_PUSH] <== first_op_is_push;
@@ -227,10 +217,8 @@ template ZKVM(n) {
       mul_result[i][j] <== stack[i - 1][j] * stack[i - 1][j + 1];
     }
 
-    // these values cannot be used in practice because
-    // the stack doesn't go that high.
-    // However, we still need to initialize
-    // them because every column checks
+    // these values cannot be used in practice because the stack doesn't go that high.
+    // However, we still need to initialize them because every column checks
     // if it is sp - 1, even the last 2
     for (var j = n - 1; j < n; j++) {
       sum_result[i][j] <== 0;
@@ -256,10 +244,8 @@ template ZKVM(n) {
       eqSP[i][j].in[1] <== sp[i];
       eqSPAndIsPush[i][j] <== eqSP[i][j].out * metaTable[i][IS_PUSH];
 
-      // check if the column is two less
-      // than the stack pointer
-      // if so, we prepare to write the sum or
-      // product here
+      // check if the column is two less than the stack pointer
+      // if so, we prepare to write the sum or product here
       // if the current instruction is add or mul
       eqSPMinus2[i][j] = IsEqual();
       eqSPMinus2[i][j].in[0] <== j;
