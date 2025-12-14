@@ -10,9 +10,7 @@ template AND3() {
   out <== temp * in[2];
 }
 
-// j is the column number
-// bits is how many bits we need
-// for the LessEqThan component
+// j is the column number bits is how many bits we need for the LessEqThan component
 template ShouldCopy(j, bits) {
   signal input sp;
   signal input is_pop;
@@ -28,8 +26,7 @@ template ShouldCopy(j, bits) {
   is_push * (1 - is_push) === 0;
   is_pop * (1 - is_pop) === 0;
 
-  // it's cheaper to compute ≠ 0 than > 0 to avoid
-  // converting the number to binary
+  // it's cheaper to compute ≠ 0 than > 0 to avoid converting the number to binary
   signal spEqZero;
   signal spGteOne;
   spEqZero <== IsZero()(sp);
@@ -41,12 +38,10 @@ template ShouldCopy(j, bits) {
   spEqOne <== IsEqual()([sp, 1]);
   spGteTwo <== 1 - spEqOne * spEqZero;
 
-  // the current column is 1 or more 
-  // below the stack pointer
+  // the current column is 1 or more below the stack pointer
   signal oneBelowSp <== LessEqThan(bits)([j, sp - 1]);
 
-  // the current column is 2 or more
-  // below the stack pointer
+  // the current column is 2 or more below the stack pointer
   signal twoBelowSP <== LessEqThan(bits)([j, sp - 2]);
 
   // condition A
@@ -89,9 +84,7 @@ template CopyStack(m) {
   }
 }
 
-// n is how many instructions we can handle
-// since all the instructions might be push,
-// our stack needs capacity of up to n
+// n is how many instructions we can handle since all the instructions might be push, our stack needs capacity of up to n
 template StackBuilder(n) {
   var NOP = 0;
   var PUSH = 1;
@@ -99,10 +92,8 @@ template StackBuilder(n) {
 
   signal input instr[2 * n];
 
-  // we add one extra row for sp because
-  // our algorithm always writes to the
-  // next row and we don't want to conditionally
-  // check for an array-out-of-bounds
+  // we add one extra row for sp because our algorithm always writes to the
+  // next row and we don't want to conditionally check for an array-out-of-bounds
   signal output sp[n + 1];
 
   signal output stack[n][n];
@@ -121,9 +112,7 @@ template StackBuilder(n) {
   signal first_op_is_push;
   first_op_is_push <== IsEqual()([instr[0], PUSH]);
 
-  // if the first op is NOP, we are forcing the first
-  // value to be zero, but this is where the stack
-  // pointer is, so it doesn't matter
+  // if the first op is NOP, we are forcing the first value to be zero, but this is where the stack pointer is, so it doesn't matter
   stack[0][0] <== first_op_is_push * instr[1];
 
   // initialize the rest of the first stack to be zero
@@ -131,10 +120,8 @@ template StackBuilder(n) {
       stack[0][i] <== 0;
   }
 
-  // we fill out the 0th elements to avoid
-  // uninitialzed signals. For a particular
-  // execution, we only want one possible witness
-  // to correspond to a particular execution
+  // we fill out the 0th elements to avoid uninitialzed signals. For a particular
+  // execution, we only want one possible witness to correspond to a particular execution
   sp[0] <== 0;
   sp[1] <== first_op_is_push;
   metaTable[0][IS_PUSH] <== first_op_is_push;
@@ -142,10 +129,8 @@ template StackBuilder(n) {
   metaTable[0][IS_NOP] <== 1 - first_op_is_push;
   metaTable[0][ARG] <== instr[1];
 
-  // spBranch is what we add to the previous
-  // stack pointer based on the opcode.
-  // Could be 1, 0, or -1 depending on the
-  // opcode. Since the first opcode
+  // spBranch is what we add to the previous stack pointer based on the opcode.
+  // Could be 1, 0, or -1 depending on the opcode. Since the first opcode
   // cannot be POP, -1 is not an option here.
   var SAME = 0;
   var INC = 1;
@@ -155,8 +140,7 @@ template StackBuilder(n) {
   spBranch[0][SAME] <== (1 - first_op_is_push) * 0;
   spBranch[0][DEC] <== 0;
 
-  // populate the first row of the metaTable
-  // and the stack pointer
+  // populate the first row of the metaTable and the stack pointer
   component EqPush[n];
   component EqNop[n];
   component EqPop[n];
