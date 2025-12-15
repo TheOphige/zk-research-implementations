@@ -12,7 +12,12 @@ template AND3() {
   out <== temp * in[2];
 }
 
-// i is the column number bits is how many bits we need for the LessEqThan component
+// This component will be used in a loop to determine if a particular column j should be copied. 
+// It sets out = 1 if a particular column should be copied. 
+// This component is applied to each column for each row.
+
+// j is the column number 
+// bits is how many bits we need for the LessEqThan component
 template ShouldCopy(i, bits) {
   signal input sp;
   signal input is_push;
@@ -59,13 +64,16 @@ template ShouldCopy(i, bits) {
   a3B.in[0] <== spGteTwo;
   a3B.in[1] <== threeBelowSP;
   a3B.in[2] <== is_add + is_mul;
-
+  
+  // copy if condition A or condition B is met
   component or = OR();
   or.a <== a3A.out;
   or.b <== a3B.out;  
   out <== or.out;
 }
 
+// CopyStack uses ShouldCopy in a loop to determine which parts of the previous stack should be copied to the new one. 
+// It returns an array of 0 or 1 to determine which columns should be copied.
 template CopyStack(m) {
   var nBits = 4;
     signal output out[m];
