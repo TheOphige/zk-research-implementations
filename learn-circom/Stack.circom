@@ -1,6 +1,7 @@
 include "circomlib/comparators.circom";
 include "circomlib/gates.circom";
 
+// RETURNS 1 IF ALL THE INPUTS ARE 1
 template AND3() {
   signal input in[3];
   signal output out;
@@ -10,9 +11,14 @@ template AND3() {
   out <== temp * in[2];
 }
 
-// j is the column number bits is how many bits we need for the LessEqThan component
+// This component will be used in a loop to determine if a particular column j should be copied. 
+// It sets out = 1 if a particular column should be copied. 
+// This component is applied to each column for each row.
+
+// j is the column number 
+// bits is how many bits we need for the LessEqThan component
 template ShouldCopy(j, bits) {
-  signal input sp;
+  signal input sp; // index of the top element + 1
   signal input is_pop;
   signal input is_push;
   signal input is_nop;
@@ -21,17 +27,20 @@ template ShouldCopy(j, bits) {
   signal output out;
 
   // sanity checks
+  // you can only have one of pop, push or nop at a time
   is_pop + is_push + is_nop === 1;
   is_nop * (1 - is_nop) === 0;
   is_push * (1 - is_push) === 0;
   is_pop * (1 - is_pop) === 0;
-
+  
+  // check if sp is greaterthan or equal to one
   // it's cheaper to compute ≠ 0 than > 0 to avoid converting the number to binary
   signal spEqZero;
   signal spGteOne;
   spEqZero <== IsZero()(sp);
   spGteOne <== 1 - spEqZero;
 
+  // check if sp is greaterthan or equal to two
   // it's cheaper to compute ≠ 0 and ≠ 1 than ≥ 2
   signal spEqOne;
   signal spGteTwo;
@@ -39,31 +48,42 @@ template ShouldCopy(j, bits) {
   spGteTwo <== 1 - spEqOne * spEqZero;
 
   // the current column is 1 or more below the stack pointer
+  // Since: top element index = sp - 1
+  // Is column j ≤ the top element of the stack?
   signal oneBelowSp <== LessEqThan(bits)([j, sp - 1]);
 
   // the current column is 2 or more below the stack pointer
+  // Since: sp - 2 is one below the top
+  // Is column j at least two positions below the stack pointer?
   signal twoBelowSP <== LessEqThan(bits)([j, sp - 2]);
 
   // condition A
+  // if the sp is 1 or greater, and our column is 1 index below sp, and the current instruction is PUSH or NOP, 
+  // then all the values 0..sp - 1 inclusive must be copied.
   component a3A = AND3();
   a3A.in[0] <== spGteOne;
   a3A.in[1] <== oneBelowSp;
   a3A.in[2] <== is_push + is_nop;
 
   // condition B
+  // if the sp is 2 or greater, and our column is 2 indexes below sp, and the current instruction is POP 
+  // then all the values 0..sp - 2 inclusive must be copied.
   component a3B = AND3();
   a3B.in[0] <== spGteTwo;
   a3B.in[1] <== twoBelowSP;
   a3B.in[2] <== is_pop;
 
+  // copy if condition A or condition B is met
   component or = OR();
   or.a <== a3A.out;
   or.b <== a3B.out;  
   out <== or.out;
 }
 
+// CopyStack uses ShouldCopy in a loop to determine which columns of the previous stack should be copied to the new one. 
+// It returns an array of 0 or 1 to determine which columns should be copied.
 template CopyStack(m) {
-  var nBits = 4;
+    var nBits = 4;
     signal output out[m];
     signal input sp;
     signal input is_pop;
@@ -74,14 +94,14 @@ template CopyStack(m) {
     signal copy[m];
 
     // loop over the columns
-  for (var j = 0; j < m; j++) {
-    ShouldCopys[j] = ShouldCopy(j, nBits);
-    ShouldCopys[j].sp <== sp;
-    ShouldCopys[j].is_pop <== is_pop;
-    ShouldCopys[j].is_push <== is_push;
-    ShouldCopys[j].is_nop <== is_nop;
-    out[j] <== ShouldCopys[j].out;
-  }
+    for (var j = 0; j < m; j++) {
+        ShouldCopys[j] = ShouldCopy(j, nBits);
+        ShouldCopys[j].sp <== sp;
+        ShouldCopys[j].is_pop <== is_pop;
+        ShouldCopys[j].is_push <== is_push;
+        ShouldCopys[j].is_nop <== is_nop;
+        out[j] <== ShouldCopys[j].out;
+    }
 }
 
 // n is how many instructions we can handle since all the instructions might be push, our stack needs capacity of up to n
