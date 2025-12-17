@@ -107,8 +107,7 @@ template ZKVM(n) {
 
   signal input instr[2 * n];
 
-  // we add one extra row for sp because our algorithm always writes to the
-  // next row and we don't want to conditionally check for an array-out-of-bounds
+  // we add one extra row for sp because our algorithm always writes to the next row and we don't want to conditionally check for an array-out-of-bounds
   signal output sp[n + 1];
 
   signal output stack[n][n];
