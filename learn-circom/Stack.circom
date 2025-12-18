@@ -33,6 +33,7 @@ template ShouldCopy(j, bits) {
   is_push * (1 - is_push) === 0;
   is_pop * (1 - is_pop) === 0;
   
+  // spgteone and spgtetwo to prevent underflow
   // check if sp is greaterthan or equal to one
   // it's cheaper to compute ≠ 0 than > 0 to avoid converting the number to binary
   signal spEqZero;
