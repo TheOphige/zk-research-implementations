@@ -133,7 +133,8 @@ template StackBuilder(n) {
     signal first_op_is_push;
     first_op_is_push <== IsEqual()([instr[0], PUSH]);
 
-    // if the first op is NOP, we are forcing the first value to be zero, but this is where the stack pointer is, so it doesn't matter
+    // if the first op is NOP, we are forcing the first value to be zero, 
+    // but this is where the stack pointer is, so it doesn't matter
     stack[0][0] <== first_op_is_push * instr[1];
 
     // initialize the rest of the first stack to be zero
