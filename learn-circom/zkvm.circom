@@ -143,10 +143,9 @@ template ZKVM(n) {
   metaTable[0][IS_MUL] <== 0;
   metaTable[0][ARG] <== instr[1];
 
-  // spBranch is what we add to the previous stack pointer
-  // based on the opcode. Could be 1, 0, or -1 depending on the
-  // opcode. Since the first opcode cannot be POP, -1 is not
-  // an option here.
+  // spBranch is what we add to the previous stack pointer based on the opcode. 
+  // Could be 1, 0, or -1 depending on the opcode. 
+  // Since the first opcode cannot be POP, -1 is not an option here.
   var SAME = 0;
   var INC = 1;
   var DEC = 2;
