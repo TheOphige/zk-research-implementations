@@ -105,6 +105,7 @@ template ZKVM(n) {
   var ADD = 2;
   var MUL = 3;
 
+
   signal input instr[2 * n];
 
   // we add one extra row for sp because our algorithm 
