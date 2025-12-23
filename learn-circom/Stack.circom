@@ -151,6 +151,7 @@ template StackBuilder(n) {
     metaTable[0][IS_NOP] <== 1 - first_op_is_push;
     metaTable[0][ARG] <== instr[1];
 
+
     // spBranch is what we add to the previous stack pointer based on the opcode.
     // Could be 1, 0, or -1 depending on the opcode. Since the first opcode
     // cannot be POP, -1 is not an option here.
