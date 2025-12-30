@@ -39,4 +39,3 @@ template DivMod(wordsize){
     IsZero === 0;
 }
 
-component main = DivMod(32);
