@@ -1,48 +1,53 @@
 pragma circom 2.1.4;
 
-include "./node_modules/circomlib/circuits/multiplexer.circom";
 include "./node_modules/circomlib/circuits/comparators.circom";
 
-template LeftShift32(wordsize) {
-    assert(wordsize >= 1);
-    
+template LeftShift32() {
     signal input x;
     signal input s;
-
     signal output out;
 
     // range check
-    component n2bX = Num2Bits(wordsize);
-    component n2bS = Num2Bits(wordsize);
+    component n2bX = Num2Bits(32);
+    component n2bS = Num2Bits(6);
     n2bX.in <== x;
     n2bS.in <== s;
 
-    // ensure that s < wordsize
-    signal sLTwordsize;
-    sLTwordsize <== LessThan(252)([s, wordsize]);
-    sLTwordsize === 1;
-
-    // precompute powers sequence from 0 to 31: power[i] = base^i
+    // Precompute powers of 2
     signal pow2[32];
     pow2[0] <== 1;
     for (var i = 1; i < 32; i++) {
         pow2[i] <== pow2[i - 1] * 2;
     }
 
-    // select the power number of interest
-    component mux = Multiplexer(1, wordsize);
-    mux.sel <== s;
+    // Compute (s < 32) but DO NOT fail
+    component lt = LessThan(6);
+    lt.in[0] <== s;
+    lt.in[1] <== 32;
+    signal sLT32;
+    sLT32 <== lt.out;
 
-    // select the power into the quin selector
-    for (var i=0; i<wordsize; i++){
-        mux.inp[i][0] <== pow2[i];
+    // Quin-style selector
+    signal prod[32];
+    component eqs[32];
+
+    for (var i = 0; i < 32; i++) {
+        eqs[i] = IsEqual();
+        eqs[i].in[0] <== i;
+        eqs[i].in[1] <== s;
+        prod[i] <== eqs[i].out * pow2[i];
+    }
+
+    var sum;
+    for (var i = 0; i < 32; i++) {
+        sum += prod[i];
     }
 
     signal factor;
-    factor <== sLTwordsize * mux.out[0];
+    factor <== sLT32 * sum;
 
+    // Mask output
     out <== x * factor;
 }
 
-component main = LeftShift32(32);
-
+component main = LeftShift32();
