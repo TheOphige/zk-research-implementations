@@ -86,6 +86,7 @@ template BitwiseNot32() {
     b2n.out ==> out;
 }
 
+// takes a number and returns an array of numbers (1 byte each)
 // n is the number of bytes
 template ToBytes(n) {
     signal input in;
@@ -95,7 +96,8 @@ template ToBytes(n) {
     component n2b = Num2Bits(n * 8);
     n2b.in <== in;
 
-    component b2ns[n];
+    // convert each byte(8 bits) to number and store in array
+    component b2ns[n]; 
     for (var i = 0; i < n; i++) {
         b2ns[i] = Bits2Num(8);
         for (var j = 0; j < 8; j++) {
@@ -105,6 +107,7 @@ template ToBytes(n) {
     }
 }
 
+// takes in message, add marker at end, pad with zeros to make it 56 bytes, add original length in bits, circom impliicitly pads with zeros to make it 64 bytes
 // n is the number of bytes
 template Padding(n) {
     // 56 bytes = 448 bits
@@ -129,19 +132,20 @@ template Padding(n) {
         out[i] <== 0;
     }
 
-    // append original length in bits
+    // append original length in bits at bytes 57 (and 58)
     var lenBits = n * 8;
     if (lenBits < 256) {
-        out[56] <== lenBits;
+        out[56] <== lenBits; // bytes 58–64 are implicitly zero
     }
     else {
         var lowOrderBytes = lenBits % 256;
         var highOrderBytes = lenBits \ 256;
         out[56] <== lowOrderBytes;
-        out[57] <== highOrderBytes;
+        out[57] <== highOrderBytes; // bytes 59–64 are implicitly zero
     }
 }
 
+// 32-bit overflow masking
 template Overflow32() {
     signal input in;
     signal output out;
@@ -157,6 +161,7 @@ template Overflow32() {
     b2n.out ==> out;
 }
 
+// Rotates bits left instead of shifting
 template LeftRotate(s) {
     signal input in;
     signal output out;
@@ -166,6 +171,7 @@ template LeftRotate(s) {
 
     n2b.in <== in;
 
+    // Take each bit at position i and move it to position (i + s) mod 32
     for (var i = 0; i < 32; i++) {
         b2n.in[(i + s) % 32] <== n2b.out[i];
     }
@@ -173,6 +179,9 @@ template LeftRotate(s) {
     out <== b2n.out;
 }
 
+// four MD5 nonlinear functions (F, G, H, I)
+// Depending on the round number i, MD5 uses one of four Boolean functions
+// To introduce nonlinearity, break algebraic structure, make inversion difficult
 template Func(i) {
     assert(i <= 64);
     signal input b;
@@ -182,6 +191,7 @@ template Func(i) {
     signal output out;
 
     if (i < 16) {
+        // (B ∧ C) ∨ (¬B ∧ D)
         component a1 = BitwiseAnd32();
         a1.in[0] <== b;
         a1.in[1] <== c;
@@ -217,6 +227,7 @@ template Func(i) {
         out <== o1.out;
     }
     else if (i >= 32 && i < 48) {
+        // B XOR C XOR D
         component x1 = BitwiseXor32();
         component x2 = BitwiseXor32();
 
@@ -229,6 +240,7 @@ template Func(i) {
     }
     // i must be < 64 by the assert statement above
     else {
+        // C XOR (B OR (~D))
         component o1 = BitwiseOr32();
         component n1 = BitwiseNot32();
         n1.in <== d;
@@ -277,6 +289,7 @@ template MD5(n) {
      5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12, 15, 2,
     0, 7, 14, 5, 12, 3, 10, 1, 8, 15, 6, 13, 4, 11, 2, 9];
 
+    // input is array of bytes  
     signal input in[n];
 
     // Pad the (<56 bytes) message to make it 64 bytes
@@ -298,6 +311,9 @@ template MD5(n) {
         data32[i] <== inp[4 * i] + inp[4 * i + 1] * 2**8 + inp[4 * i + 2] * 2**16 + inp[4 * i + 3] * 2**24;
     }
 
+    // Initialize MD5 State
+    // These are fixed IV values defined by the MD5 standard.
+    // STATE = table of 65 rows and 4 columns (A, B, C, D)
     var A = 0;
     var B = 1;
     var C = 2;
@@ -308,6 +324,22 @@ template MD5(n) {
     buffer[0][C] <== 2562383102;
     buffer[0][D] <== 271733878;
 
+    // Main MD5 Compression Function
+    // MD5 processes each 512-bit message block using a
+    // 128-bit internal state split into four 32-bit words:
+    //    A, B, C, D
+    //
+    // Formally, for round i:
+    //
+    //   F_i(B, C, D)  = nonlinear Boolean function
+    //   g(i)          = message word permutation
+    //
+    //   temp = A + F_i(B,C,D) + K[i] + M[g(i)]
+    //   temp = ROTL(temp, s[i])
+    //   B'   = B + temp
+    //
+    //   (A,B,C,D) ← (D, B', B, C)
+    //
     component Funcs[64];
     signal toRotates[64];
     component SelectInputWords[64];
@@ -339,6 +371,7 @@ template MD5(n) {
         buffer[i + 1][D] <== buffer[i][C];
     }
 
+    // After 64 rounds, MD5 adds the original initial state to the final state
     component addA = Overflow32();
     component addB = Overflow32();
     component addC = Overflow32();
@@ -351,6 +384,7 @@ template MD5(n) {
     addC.in <== 2562383102 + buffer[64][C];
     addD.in <== 271733878 + buffer[64][D];
 
+    // MD5 outputs the hash as little-endian
     signal littleEndianMd5;
     littleEndianMd5 <== addA.out + addB.out * 2**32 + addC.out * 2**64 + addD.out * 2**96;
 
