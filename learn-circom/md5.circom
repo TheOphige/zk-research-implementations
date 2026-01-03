@@ -1,6 +1,21 @@
-include "circomlib/bitify.circom";
-include "circomlib/gates.circom";
+include "./node_modules/circomlib/circuits/bitify.circom";
+include "./node_modules/circomlib/circuits/gates.circom";
 
+// NOTE: MD5 rounds are 1-indexed in the RFC.
+// This implementation uses 0-indexing, so:
+// rounds 0–15   → F
+// rounds 16–31  → G
+// rounds 32–47  → H
+// rounds 48–63  → I
+
+
+// Circom has no native bitwise operators.
+// To implement AND / OR / XOR, we must:
+// 1) Decompose field elements into bits
+// 2) Apply Boolean gates per bit
+// 3) Recompose bits into a 32-bit number
+//
+// This is why MD5 is constraint-heavy in SNARKs.
 template BitwiseAnd32() {
     signal input in[2];
     signal output out;
@@ -162,6 +177,7 @@ template Overflow32() {
 }
 
 // Rotates bits left instead of shifting
+// This is a key diffusion mechanism in MD5.
 template LeftRotate(s) {
     signal input in;
     signal output out;
@@ -305,7 +321,10 @@ template MD5(n) {
 
     // Split the padded message into 32-bit words
     // 64 bytes (512 bits) = 32 bit * 16
-    // formular for conversion ?????
+    // Convert 4 bytes into one 32-bit word using little-endian order:
+    // M[i] = inp[4i] + inp[4i+1] * 2^8 + inp[4i+2] * 2^16 + inp[4i+3] * 2^24
+    // MD5 defines message words in little-endian format.
+
     signal data32[16];
     for (var i = 0; i < 16; i++) {
         data32[i] <== inp[4 * i] + inp[4 * i + 1] * 2**8 + inp[4 * i + 2] * 2**16 + inp[4 * i + 3] * 2**24;
@@ -377,8 +396,7 @@ template MD5(n) {
     component addC = Overflow32();
     component addD = Overflow32();
 
-    // we hardcode initial state because we only
-    // process one 512 bit block
+    // we hardcode initial state because we only process one 512 bit block
     addA.in <== 1732584193 + buffer[64][A];
     addB.in <== 4023233417 + buffer[64][B];
     addC.in <== 2562383102 + buffer[64][C];
