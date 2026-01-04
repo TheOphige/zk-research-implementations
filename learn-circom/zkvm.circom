@@ -98,6 +98,7 @@ template CopyStack(m) {
     }
 }
 
+// main ZKVM component
 // n is how many instructions we can handle since all the instructions might be push, our stack needs capacity of up to n
 template ZKVM(n) {
   var NOP = 0;
