@@ -1,7 +1,7 @@
 pragma circom 2.1.6;
 
-include "circomlib/comparators.circom";
-include "circomlib/gates.circom";
+include "./node_modules/circomlib/circuits/comparators.circom";
+include "./node_modules/circomlib/circuits/gates.circom";
 
 template AND3() {
   signal input in[3];

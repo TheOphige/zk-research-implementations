@@ -1,5 +1,5 @@
-include "circomlib/comparators.circom";
-include "circomlib/gates.circom";
+include "./node_modules/circomlib/circuits/comparators.circom";
+include "./node_modules/circomlib/circuits/gates.circom";
 
 // RETURNS 1 IF ALL THE INPUTS ARE 1
 template AND3() {
