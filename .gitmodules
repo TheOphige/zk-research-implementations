@@ -4,3 +4,6 @@
 [submodule "ZK-bulletproofs"]
 	path = ZK-bulletproofs
 	url = https://github.com/TheOphige/ZK-bulletproofs.git
+[submodule "noir-puzzles"]
+	path = noir-puzzles
+	url = https://github.com/TheOphige/noir-puzzles.git
